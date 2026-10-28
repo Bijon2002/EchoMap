@@ -1,0 +1,22 @@
+# Environment & Credentials
+.env
+.venv/
+env/
+venv/
+ENV/
+
+# Python Cache
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+
+# Database & runtime assets
+echomap.db
+echomap.db-journal
+echomap.db-wal
+*.log
+
+# Operating System Files
+.DS_Store
+Thumbs.db
