@@ -122,7 +122,7 @@ with st.sidebar:
 
     st.markdown("---")
     st.markdown("### 🧪 Quick Demo Setup")
-    if st.button("🚀 Load Sample Desk Memory", use_container_width=True, help="Load a pre-configured realistic desk for judging/testing"):
+    if st.button("🚀 Load Sample Desk Memory", width="stretch", help="Load a pre-configured realistic desk for judging/testing"):
         sample_objects = [
             {"name": "phone", "x": 0.28, "y": 0.52, "confidence": 0.96, "region_desc": "left side of the desk"},
             {"name": "keys", "x": 0.35, "y": 0.48, "confidence": 0.91, "region_desc": "centre of the desk"},
@@ -139,7 +139,7 @@ with st.sidebar:
         st.success("Sample desk loaded into SQLite!")
         st.rerun()
 
-    if st.button("🗑️ Reset All Memory", use_container_width=True):
+    if st.button("🗑️ Reset All Memory", width="stretch"):
         memory.clear_memory()
         st.session_state.last_response = "Memory cleared."
         st.warning("All scans and corrections cleared.")
@@ -193,7 +193,7 @@ with tab_voice:
         ]
         for idx, q_text in enumerate(sample_queries):
             c = q_cols[idx % 2]
-            if c.button(q_text, key=f"quick_q_{idx}", use_container_width=True):
+            if c.button(q_text, key=f"quick_q_{idx}", width="stretch"):
                 st.session_state.pending_query = q_text
 
     with col_v2:
@@ -208,9 +208,9 @@ with tab_voice:
 
         col_ask, col_read = st.columns([1, 1])
         with col_ask:
-            ask_pressed = st.button("🔍 Answer from Memory", type="primary", use_container_width=True)
+            ask_pressed = st.button("🔍 Answer from Memory", type="primary", width="stretch")
         with col_read:
-            repeat_pressed = st.button("🔊 Repeat Spoken Answer", use_container_width=True)
+            repeat_pressed = st.button("🔊 Repeat Spoken Answer", width="stretch")
 
         if ask_pressed and query_input.strip():
             answer = commands.answer_question(
@@ -274,7 +274,7 @@ with tab_scan:
 
         elif scan_mode == "🧪 Demo Image":
             st.info("Demonstration Mode: Generates a synthetic desk workspace with everyday objects for evaluation.")
-            if st.button("🖼️ Generate Mock Desk Scene", use_container_width=True):
+            if st.button("🖼️ Generate Mock Desk Scene", width="stretch"):
                 # Create a simple synthetic desk image
                 img = Image.new("RGB", (800, 600), color=(235, 230, 220))
                 draw = ImageDraw.Draw(img)
@@ -284,9 +284,9 @@ with tab_scan:
                 st.session_state.processed_image = img
 
         if image_to_process:
-            st.image(image_to_process, caption="Captured Image Preview", use_container_width=True)
+            st.image(image_to_process, caption="Captured Image Preview", width="stretch")
             
-            if st.button("🧠 Scan & Remember Desk with Gemini", type="primary", use_container_width=True):
+            if st.button("🧠 Scan & Remember Desk with Gemini", type="primary", width="stretch"):
                 with st.spinner("Analyzing image spatial relationships with Google Gemini..."):
                     try:
                         detected = vision.scan_desk(image_to_process)
@@ -314,7 +314,7 @@ with tab_scan:
             df_display = df[["name", "region_desc", "confidence", "x", "y"]].copy()
             df_display.columns = ["Object", "Region", "Confidence", "X (norm)", "Y (norm)"]
             df_display["Confidence"] = df_display["Confidence"].apply(lambda v: f"{int(v*100)}%")
-            st.dataframe(df_display, use_container_width=True, hide_index=True)
+            st.dataframe(df_display, width="stretch", hide_index=True)
         else:
             st.write("No objects recorded in memory yet. Perform a scan or load sample memory.")
 
@@ -389,7 +389,7 @@ with tab_map:
             # Label
             draw.text((px + 18, py - 8), obj["name"].title(), fill=(255, 255, 255))
 
-        st.image(map_img, caption="Spatial 9-Grid Layout (Coordinates normalized relative to desk boundaries)", use_container_width=True)
+        st.image(map_img, caption="Spatial 9-Grid Layout (Coordinates normalized relative to desk boundaries)", width="stretch")
 
         # Grid Cards Summary
         st.markdown("#### 📍 Objects by Spatial Sector:")
@@ -418,7 +418,7 @@ with tab_diff:
 
     if not latest or not prev:
         st.info("Scan diffing requires at least two scans in memory. Capture another scan or test simulated movement below.")
-        if st.button("🧪 Simulate Moved Keys & Missing Mug", use_container_width=False):
+        if st.button("🧪 Simulate Moved Keys & Missing Mug", width="content"):
             # Save a second scan with moved items
             simulated_new = [
                 {"name": "phone", "x": 0.28, "y": 0.52, "confidence": 0.96, "region_desc": "left side of the desk"},
@@ -487,7 +487,7 @@ with tab_corrections:
     saved_corrs = memory.get_corrections()
     if saved_corrs:
         corr_df = pd.DataFrame(saved_corrs)[["id", "object_name", "relation_type", "reference_object", "note", "created_at"]]
-        st.dataframe(corr_df, use_container_width=True, hide_index=True)
+        st.dataframe(corr_df, width="stretch", hide_index=True)
     else:
         st.caption("No user corrections recorded yet.")
 

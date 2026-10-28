@@ -17,7 +17,8 @@ from spatial import region
 load_dotenv()
 
 API_KEY = os.getenv("GEMINI_API_KEY", "").strip()
-MODEL_NAME = os.getenv("GEMINI_MODEL", "gemini-2.5-flash").strip()
+MODEL_NAME = os.getenv("GEMINI_MODEL", "gemini-3.5-flash").strip()
+FALLBACK_MODELS = ["gemini-3.5-flash", "gemini-3.5-flash-lite"]
 
 
 class DetectedObject(BaseModel):
@@ -96,37 +97,40 @@ Example format:
 ]
 """
 
-    try:
-        response = client.models.generate_content(
-            model=MODEL_NAME,
-            contents=[image, prompt],
-        )
-        raw_text = response.text or ""
-        json_str = clean_json_response(raw_text)
-        data = json.loads(json_str)
+    models_to_try = [MODEL_NAME] + [m for m in FALLBACK_MODELS if m != MODEL_NAME]
+    last_err = None
 
-        validated_objects: List[Dict[str, Any]] = []
-        for entry in data:
-            try:
-                # Clamp coordinates safely into [0.0, 1.0]
-                entry["x"] = max(0.0, min(1.0, float(entry.get("x", 0.5))))
-                entry["y"] = max(0.0, min(1.0, float(entry.get("y", 0.5))))
-                entry["confidence"] = max(0.0, min(1.0, float(entry.get("confidence", 0.8))))
-                
-                validated = DetectedObject(**entry)
-                if validated.visible:
-                    item_dict = validated.model_dump()
-                    item_dict["name"] = item_dict["name"].strip().lower()
-                    item_dict["region_desc"] = region(item_dict["x"], item_dict["y"])
-                    validated_objects.append(item_dict)
-            except (ValidationError, TypeError, ValueError):
-                continue
+    for model_name in models_to_try:
+        try:
+            response = client.models.generate_content(
+                model=model_name,
+                contents=[image, prompt],
+            )
+            raw_text = response.text or ""
+            json_str = clean_json_response(raw_text)
+            data = json.loads(json_str)
 
-        if not validated_objects:
-            # If AI returned valid JSON but empty or parsing failed
-            return []
-        return validated_objects
+            validated_objects: List[Dict[str, Any]] = []
+            for entry in data:
+                try:
+                    # Clamp coordinates safely into [0.0, 1.0]
+                    entry["x"] = max(0.0, min(1.0, float(entry.get("x", 0.5))))
+                    entry["y"] = max(0.0, min(1.0, float(entry.get("y", 0.5))))
+                    entry["confidence"] = max(0.0, min(1.0, float(entry.get("confidence", 0.8))))
+                    
+                    validated = DetectedObject(**entry)
+                    if validated.visible:
+                        item_dict = validated.model_dump()
+                        item_dict["name"] = item_dict["name"].strip().lower()
+                        item_dict["region_desc"] = region(item_dict["x"], item_dict["y"])
+                        validated_objects.append(item_dict)
+                except (ValidationError, TypeError, ValueError):
+                    continue
 
-    except Exception as e:
-        # If API quota exceeded or connection failure, raise or provide fallback
-        raise RuntimeError(f"EchoMap Vision API Error: {str(e)}")
+            return validated_objects
+
+        except Exception as e:
+            last_err = e
+            continue
+
+    raise RuntimeError(f"EchoMap Vision API Error: {str(last_err)}")
