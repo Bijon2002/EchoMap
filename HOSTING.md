@@ -1,59 +1,61 @@
-# 🚀 Hosting EchoMap (Production Guide)
+# EchoMap Free Hosting Guide
 
-EchoMap can be hosted for **free** on multiple cloud platforms within 2-5 minutes.
+EchoMap is fully configured for zero-cost cloud hosting on **Render**, **Railway**, **Koyeb**, or **Hugging Face Spaces**.
 
 ---
 
-## Option 1: Render.com (Recommended — 1-Click Free Hosting)
+## Option 1: Render.com (Recommended Free Tier)
 
-1. Fork or push the `EchoMap` repository to your **GitHub** account.
-2. Sign up at [Render.com](https://render.com) (free).
-3. Click **"New +"** &rarr; **"Web Service"**.
-4. Select your `EchoMap` GitHub repository.
-5. Configure the following:
-   - **Environment**: `Python 3`
+1. Push this repository to **GitHub**:
+   ```bash
+   git init
+   git add .
+   git commit -m "Initial EchoMap release with Nexus AI"
+   git remote add origin https://github.com/<your-username>/echomap.git
+   git push -u origin main
+   ```
+2. Log into [Render Dashboard](https://dashboard.render.com/) and click **New → Web Service**.
+3. Connect your `echomap` GitHub repository.
+4. Render will automatically detect [`render.yaml`](file:///a:/EchoMap/render.yaml):
+   - **Environment**: Python 3
    - **Build Command**: `pip install -r requirements.txt`
    - **Start Command**: `uvicorn server:app --host 0.0.0.0 --port $PORT`
-6. Under **Environment Variables**, add:
-   - `GEMINI_API_KEY`: Your Gemini API key (`AQ.Ab8RN...`)
-   - `GEMINI_MODEL`: `gemini-3.5-flash`
-7. Click **Create Web Service**. Your app will be live at `https://your-app.onrender.com`.
+5. Under **Environment Variables**, add:
+   - `NEXUS_API_KEY`: `sk-YRxt1RzLVFoFqmnwZpSIFA`
+   - `NEXUS_BASE_URL`: `https://nexusapi.navigatelabs.ai`
+   - `NEXUS_MODEL`: `gemini-3.1-flash-lite`
+6. Click **Create Web Service**. Within ~2 minutes, your public HTTPS app URL will be live!
 
 ---
 
-## Option 2: Railway.app (Fastest Deployment)
+## Option 2: Railway.app
 
-1. Go to [Railway.app](https://railway.app).
-2. Click **"New Project"** &rarr; **"Deploy from GitHub repo"**.
-3. Select `EchoMap`.
-4. Railway will automatically detect the `Dockerfile` and `Procfile`.
-5. In **Variables**, add `GEMINI_API_KEY`.
-6. Click **Deploy**.
-
----
-
-## Option 3: Hugging Face Spaces (Free Cloud Docker)
-
-1. Go to [Hugging Face Spaces](https://huggingface.co/spaces).
-2. Click **Create new Space**.
-3. Select **Space SDK**: **Docker** &rarr; **Blank**.
-4. Clone your space repo and push all `EchoMap` files into it.
-5. In Space Settings &rarr; **Variables and secrets**, add `GEMINI_API_KEY`.
-6. Your space will build and launch automatically.
+1. Go to [railway.app](https://railway.app/) → **New Project → Deploy from GitHub repo**.
+2. Select your repository. Railway automatically reads the [`Procfile`](file:///a:/EchoMap/Procfile) and [`requirements.txt`](file:///a:/EchoMap/requirements.txt).
+3. In the project **Variables** tab, add:
+   - `NEXUS_API_KEY`: your Nexus key
+   - `NEXUS_BASE_URL`: `https://nexusapi.navigatelabs.ai`
+   - `NEXUS_MODEL`: `gemini-3.1-flash-lite`
+4. In **Settings → Networking**, click **Generate Domain** to get a public URL.
 
 ---
 
-## Option 4: Local or VPS (Ubuntu / Debian / Windows)
+## Option 3: Docker Deployment (Koyeb, Fly.io, Self-Hosted)
+
+Run with the pre-built [`Dockerfile`](file:///a:/EchoMap/Dockerfile):
 
 ```bash
-# Clone and enter directory
-cd EchoMap
-
-# Install dependencies
-pip install -r requirements.txt
-
-# Run production server
-python -m uvicorn server:app --host 0.0.0.0 --port 8000
+docker build -t echomap .
+docker run -p 8000:8000 \
+  -e NEXUS_API_KEY="sk-YRxt1RzLVFoFqmnwZpSIFA" \
+  -e NEXUS_BASE_URL="https://nexusapi.navigatelabs.ai" \
+  -e NEXUS_MODEL="gemini-3.1-flash-lite" \
+  echomap
 ```
-Then open `http://localhost:8000`.
 
+---
+
+## Production Security Notes
+
+- The `.gitignore` prevents your real [`.env`](file:///a:/EchoMap/.env) and `echomap.db` from ever being pushed to public GitHub.
+- Users can still override or configure their own API keys via the **Settings (⚙️)** UI in the hosted web app.
