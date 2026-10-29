@@ -191,6 +191,43 @@
     };
 
     // ===================================================================
+    // CUSTOM TOAST & CONFIRM MODAL (NO BROWSER ALERTS)
+    // ===================================================================
+    let _confirmResolve = null;
+
+    function showToast(message, isError = false) {
+        const toast = document.getElementById('echomap-toast');
+        const msg = document.getElementById('toast-message');
+        if (!toast || !msg) return;
+        msg.textContent = message;
+        toast.className = `toast-card ${isError ? 'error' : ''}`;
+        toast.classList.remove('hidden');
+        clearTimeout(toast._timer);
+        toast._timer = setTimeout(() => toast.classList.add('hidden'), 3500);
+    }
+
+    function showConfirm(title, desc) {
+        return new Promise(resolve => {
+            _confirmResolve = resolve;
+            const modal = document.getElementById('confirm-modal');
+            const tEl = document.getElementById('confirm-title');
+            const dEl = document.getElementById('confirm-desc');
+            if (tEl) tEl.textContent = title;
+            if (dEl) dEl.textContent = desc;
+            if (modal) modal.classList.remove('hidden');
+        });
+    }
+
+    function closeConfirm(result) {
+        const modal = document.getElementById('confirm-modal');
+        if (modal) modal.classList.add('hidden');
+        if (_confirmResolve) {
+            _confirmResolve(result);
+            _confirmResolve = null;
+        }
+    }
+
+    // ===================================================================
     // ARIA & CONTRAST
     // ===================================================================
     function announceAria(message) {
@@ -511,28 +548,30 @@
         };
 
         state.recognition.onerror = (event) => {
+            console.warn('Speech recognition error:', event.error);
             if (event.error === 'not-allowed') {
-                if (dom.micStatusText) dom.micStatusText.innerHTML = '⚠️ Mic blocked — allow access in address bar.';
+                if (dom.micStatusText) dom.micStatusText.innerHTML = '⚠️ Mic blocked — allow microphone in browser address bar.';
                 stopListening();
-            } else if (event.error !== 'no-speech') {
-                if (dom.micStatusText) dom.micStatusText.innerHTML = `⚠️ ${event.error} — hold Space to retry.`;
+            } else if (event.error === 'no-speech') {
+                // Ignore no-speech so holding spacebar does not prematurely abort
+            } else {
+                if (dom.micStatusText) dom.micStatusText.innerHTML = `⚠️ ${event.error} — hold Space to speak.`;
                 stopListening();
             }
         };
 
         state.recognition.onend = () => {
-            if (state.isListening && !state.spacebarDown) {
-                const q = (state.accumulatedTranscript + ' ' + state.interimTranscript).trim();
-                stopListening();
-                if (q) handleUserQuery(q);
-            } else if (!state.spacebarDown) {
-                stopListening();
+            if (state.isListening) {
+                try {
+                    state.recognition.start();
+                } catch (e) {
+                    // Already running or closing
+                }
             }
         };
     }
 
     function startListening() {
-        if (state.isListening) return;
         state.isListening = true;
         state.accumulatedTranscript = '';
         state.interimTranscript = '';
@@ -541,9 +580,9 @@
         playChime('listen');
 
         if (dom.micTriggerBtn) dom.micTriggerBtn.classList.add('listening');
-        if (dom.micBtnLabel) dom.micBtnLabel.textContent = 'Listening…';
+        if (dom.micBtnLabel) dom.micBtnLabel.textContent = 'Press Space to Cancel';
         if (dom.soundwaveBars) dom.soundwaveBars.classList.remove('hidden');
-        if (dom.micStatusText) dom.micStatusText.innerHTML = '<span style="color:#0284c7;font-weight:700">● E.D.I.T.H. is listening — speak clearly...</span>';
+        if (dom.micStatusText) dom.micStatusText.innerHTML = '<span style="color:#0284c7;font-weight:700">● Listening… Speak now (or press Space to cancel)</span>';
 
         try {
             if (state.recognition) {
@@ -552,6 +591,7 @@
                 if (dom.micStatusText) dom.micStatusText.innerHTML = '⚠️ Web Speech API unavailable in this browser. Please type your query below.';
             }
         } catch (err) {
+            // Already started (InvalidStateError) is safe to ignore
             if (err.name !== 'InvalidStateError') console.warn('Mic start error:', err);
         }
     }
@@ -566,15 +606,17 @@
         }
     }
 
-    function stopListening() {
+    function stopListening(cancelled = false) {
         state.isListening = false;
         clearTimeout(state.silenceTimeout);
         try { if (state.recognition) state.recognition.stop(); } catch (e) {}
         if (dom.micTriggerBtn) dom.micTriggerBtn.classList.remove('listening');
-        if (dom.micBtnLabel) dom.micBtnLabel.textContent = 'Space to Talk';
+        if (dom.micBtnLabel) dom.micBtnLabel.textContent = 'Space to Speak';
         if (dom.soundwaveBars) dom.soundwaveBars.classList.add('hidden');
         if (dom.micStatusText) {
-            dom.micStatusText.innerHTML = 'Microphone ready. Hold <kbd>Space</kbd> to speak.';
+            dom.micStatusText.innerHTML = cancelled
+                ? '<span style="color:#e11d48">Cancelled. Press <kbd>Space</kbd> to speak.</span>'
+                : 'Microphone ready. Press <kbd>Space</kbd> to speak.';
         }
     }
 
@@ -644,14 +686,14 @@
         const model = dom.settingsModel?.value;
         if (dom.settingsFeedback) {
             dom.settingsFeedback.className = 'settings-feedback';
-            dom.settingsFeedback.textContent = 'Verifying with Google Gemini...';
+            dom.settingsFeedback.textContent = 'Verifying with Nexus AI...';
             dom.settingsFeedback.classList.remove('hidden');
         }
         try {
             const res = await fetch('/api/settings', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ api_key: key, model, test_connection: testFirst || !!key }),
+                body: JSON.stringify({ api_key: key, model, test_connection: testFirst }),
             });
             const data = await res.json();
             if (!res.ok) throw new Error(data.detail || 'Settings update failed');
@@ -856,7 +898,10 @@
         // Detected Object Nodes with Animated Pulsing Echo Rings
         objects.forEach((obj, idx) => {
             const color = PALETTE[idx % PALETTE.length];
-            const x = 24 + obj.x * (W - 48), y = 24 + obj.y * (H - 48);
+            // Clamp coordinates safely into visible desk interior (avoid edge clipping)
+            const safeX = Math.max(0.06, Math.min(0.94, obj.x));
+            const safeY = Math.max(0.06, Math.min(0.94, obj.y));
+            const x = 24 + safeX * (W - 48), y = 24 + safeY * (H - 48);
             const g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
             g.style.cursor = 'pointer';
 
@@ -1027,7 +1072,7 @@
             if (!res.ok) throw new Error(data.detail || 'Scan failed');
             speakText(data.message); await loadLatestScanData(); switchTab('tab-map');
         } catch (err) { alert(`Scan Error: ${err.message}`); }
-        finally { if (dom.btnCaptureScan) { dom.btnCaptureScan.disabled = false; dom.btnCaptureScan.innerHTML = '<i data-lucide="sparkles"></i><span>Capture with Gemini</span>'; refreshIcons(); } }
+        finally { if (dom.btnCaptureScan) { dom.btnCaptureScan.disabled = false; dom.btnCaptureScan.innerHTML = '<i data-lucide="sparkles"></i><span>Capture with Nexus AI</span>'; refreshIcons(); } }
     }
 
     // ===================================================================
@@ -1136,16 +1181,61 @@
     }
 
     async function simulateDiffAction() {
+        showToast('Scanning workspace for spatial changes…');
+        // If camera is running, capture live frame to compare!
+        if (state.cameraActive && dom.webcamStream && dom.webcamCanvas) {
+            const v = dom.webcamStream, c = dom.webcamCanvas;
+            c.width = v.videoWidth || 640;
+            c.height = v.videoHeight || 480;
+            c.getContext('2d').drawImage(v, 0, 0, c.width, c.height);
+            const b64 = c.toDataURL('image/jpeg', 0.85);
+            try {
+                const res = await fetch('/api/scan/base64', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ image_base64: b64, scene: 'desk_re-scan' })
+                });
+                const data = await res.json();
+                showToast(`Re-scan complete: ${data.detected_count} objects analyzed`);
+                await loadMovementDiff();
+                switchTab('tab-diff');
+                speakText(`Re-scan complete. Checking what moved.`);
+                return;
+            } catch (err) {
+                console.warn('Live diff fallback to simulated movement:', err);
+            }
+        }
+
+        // Fallback / Instant mode: triggers simulated movement (moved keys, missing mug)
         try {
             await fetch('/api/demo/simulate-diff', { method: 'POST' });
-            const msg = 'Simulated movement: keys moved, mug missing, glasses added.';
-            displayAnswer(msg); speakText(msg); await loadLatestScanData(); switchTab('tab-diff');
-        } catch (err) { alert(`Error: ${err.message}`); }
+            const msg = 'Movement detected: Keys moved from centre to bottom-right. Coffee mug not detected.';
+            displayAnswer(msg);
+            speakText(msg);
+            showToast('Movement test active: Keys moved');
+            await loadLatestScanData();
+            switchTab('tab-diff');
+        } catch (err) {
+            showToast(`Diff error: ${err.message}`, true);
+        }
     }
 
     async function clearMemoryAction() {
-        if (!confirm('Clear all scans and corrections?')) return;
-        try { await fetch('/api/demo/clear', { method: 'POST' }); const msg = 'Spatial memory cleared.'; displayAnswer(msg); speakText(msg); await loadLatestScanData(); } catch (err) { alert(`Error: ${err.message}`); }
+        const confirmed = await showConfirm(
+            'Wipe Spatial Memory?',
+            'This will clear all registered objects and custom facts from memory.'
+        );
+        if (!confirmed) return;
+        try {
+            await fetch('/api/demo/clear', { method: 'POST' });
+            const msg = 'Spatial memory has been wiped.';
+            displayAnswer(msg);
+            speakText(msg);
+            showToast('Memory cleared successfully');
+            await loadLatestScanData();
+        } catch (err) {
+            showToast(`Error: ${err.message}`, true);
+        }
     }
 
     // ===================================================================
@@ -1206,6 +1296,13 @@
         if (dom.btnTestKey) {
             dom.btnTestKey.addEventListener('click', () => handleSaveSettings(true));
         }
+
+        // Custom Confirm Dialog Buttons
+        document.getElementById('confirm-ok-btn')?.addEventListener('click', () => closeConfirm(true));
+        document.getElementById('confirm-cancel-btn')?.addEventListener('click', () => closeConfirm(false));
+        document.getElementById('confirm-modal')?.addEventListener('click', e => {
+            if (e.target.id === 'confirm-modal') closeConfirm(false);
+        });
 
         // Test Voice Prosody
         if (dom.btnTestVoice) {
@@ -1288,7 +1385,7 @@
         if (dom.btnRefreshDiff) dom.btnRefreshDiff.addEventListener('click', loadMovementDiff);
         if (dom.correctionForm) dom.correctionForm.addEventListener('submit', handleAddCorrection);
 
-        // PUSH-TO-TALK (HOLD SPACEBAR) & SHORTCUTS
+        // TOGGLE SPACEBAR TO SPEAK / CANCEL
         window.addEventListener('keydown', e => {
             const tag = document.activeElement?.tagName.toLowerCase();
             const inInput = ['input', 'textarea', 'select'].includes(tag);
@@ -1296,16 +1393,24 @@
             if (e.code === 'Space' && !inInput && !e.repeat) {
                 e.preventDefault();
                 document.activeElement?.blur();
-                if (!state.spacebarDown) {
-                    state.spacebarDown = true;
-                    // Automatically switch to Voice Assistant if on another tab
-                    if (state.currentTab !== 'tab-voice') {
+
+                if (state.isListening) {
+                    // Already listening -> 2nd press cancels listening!
+                    stopListening(true);
+                    announceAria('Voice input cancelled.');
+                } else {
+                    // Not listening -> 1st press starts speaking
+                    if (state.activeTab !== 'tab-voice') {
                         switchTab('tab-voice');
                     }
                     startListening();
                 }
             } else if (e.key === 'Escape') {
-                closeSettingsModal();
+                if (state.isListening) {
+                    stopListening(true);
+                } else {
+                    closeSettingsModal();
+                }
             } else if ((e.key === 'r' || e.key === 'R') && !inInput) {
                 e.preventDefault();
                 speakText(state.lastSpokenText || dom.responseText?.textContent);
@@ -1314,23 +1419,17 @@
             }
         });
 
-        window.addEventListener('keyup', e => {
-            const tag = document.activeElement?.tagName.toLowerCase();
-            const inInput = ['input', 'textarea', 'select'].includes(tag);
-
-            if (e.code === 'Space' && !inInput) {
+        // Click-to-Talk Mic Trigger (matches the same toggle behavior)
+        if (dom.micTriggerBtn) {
+            dom.micTriggerBtn.addEventListener('click', (e) => {
                 e.preventDefault();
-                if (state.spacebarDown) {
-                    state.spacebarDown = false;
-                    // Grace window so user speech tail is captured
-                    setTimeout(() => {
-                        if (state.isListening && !state.spacebarDown) {
-                            stopListeningAndQuery();
-                        }
-                    }, 350);
+                if (state.isListening) {
+                    stopListening(true);
+                } else {
+                    startListening();
                 }
-            }
-        });
+            });
+        }
     }
 
     async function handleFileUpload(file) {
@@ -1343,7 +1442,7 @@
             if (dom.btnScanUpload) {
                 dom.btnScanUpload.onclick = async () => {
                     dom.btnScanUpload.disabled = true;
-                    dom.btnScanUpload.innerHTML = '<span>Scanning with Gemini…</span>';
+                    dom.btnScanUpload.innerHTML = '<span>Scanning with Nexus AI…</span>';
 
                     try {
                         // Normalize any image format (WebP, AVIF, JFIF, etc.) to clean JPEG bytes via Canvas
@@ -1378,7 +1477,7 @@
                         alert(`Upload Error: ${err.message}`);
                     } finally {
                         dom.btnScanUpload.disabled = false;
-                        dom.btnScanUpload.innerHTML = '<i data-lucide="sparkles"></i><span>Scan with Gemini</span>';
+                        dom.btnScanUpload.innerHTML = '<i data-lucide="sparkles"></i><span>Scan with Nexus AI</span>';
                         refreshIcons();
                     }
                 };

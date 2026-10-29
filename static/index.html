@@ -10,7 +10,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
     <!-- Vector Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
-    <link rel="stylesheet" href="/static/css/style.css?v=2.4">
+    <link rel="stylesheet" href="/static/css/style.css?v=2.7">
 </head>
 <body>
     <!-- Screen Reader Announcer -->
@@ -147,9 +147,9 @@
                                 placeholder="Ask E.D.I.T.H.: Where are my keys?" 
                                 autocomplete="off"
                             >
-                            <button type="button" id="mic-trigger-btn" class="capsule-mic" title="Hold Space to Talk">
+                            <button type="button" id="mic-trigger-btn" class="capsule-mic" title="Press Space to Talk (or click)">
                                 <i data-lucide="mic"></i>
-                                <span id="mic-btn-label">Space to Talk</span>
+                                <span id="mic-btn-label">Space to Speak</span>
                             </button>
                             <button type="submit" id="btn-send-query" class="capsule-btn">
                                 <span>Ask</span>
@@ -213,7 +213,7 @@
                         <div class="card-transcript">
                             <div class="transcript-meta">
                                 <i data-lucide="audio-lines"></i>
-                                <span id="mic-status-text">Microphone ready. Hold <kbd>Space</kbd> to speak.</span>
+                                <span id="mic-status-text">Microphone ready. Press <kbd>Space</kbd> to speak.</span>
                             </div>
                             <div id="live-transcript" class="transcript-display">"Where are my keys?"</div>
                             <div id="soundwave-bars" class="soundwaves hidden">
@@ -415,7 +415,7 @@
                                 </button>
                                 <button id="btn-capture-scan" class="pill-btn solid large">
                                     <i data-lucide="sparkles"></i>
-                                    <span>Capture with Gemini</span>
+                                    <span>Capture with Nexus AI</span>
                                 </button>
                             </div>
                         </div>
@@ -438,7 +438,7 @@
                                 <img id="upload-preview-img" alt="Captured preview">
                                 <button id="btn-scan-upload" class="pill-btn solid full-width mt-3">
                                     <i data-lucide="sparkles"></i>
-                                    <span>Scan with Gemini</span>
+                                    <span>Scan with Nexus AI</span>
                                 </button>
                             </div>
                         </div>
@@ -652,14 +652,14 @@
                 <span class="footer-muted">University of Bedfordshire HCI + AI</span>
             </div>
             <div class="footer-keys">
-                Hold <kbd>Space</kbd> to Speak &bull; <kbd>R</kbd> Replay &bull; <kbd>1</kbd>–<kbd>5</kbd> Switch Tabs
+                Press <kbd>Space</kbd> to Speak &bull; Press again or <kbd>Esc</kbd> to Cancel &bull; <kbd>R</kbd> Replay &bull; <kbd>1</kbd>–<kbd>5</kbd> Switch Tabs
             </div>
         </footer>
 
     </div>
 
     <!-- ════════════════════════════════════════════
-         SETTINGS MODAL (GEMINI API KEY & MODEL)
+         SETTINGS MODAL (NEXUS AI KEY & MODEL)
          ════════════════════════════════════════════ -->
     <div id="settings-modal" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="settings-title">
         <div class="modal-card">
@@ -668,7 +668,7 @@
                     <span class="modal-icon-orb"><i data-lucide="sliders"></i></span>
                     <div>
                         <h3 id="settings-title" class="modal-title">AI &amp; Vision Settings</h3>
-                        <p class="modal-sub">Configure your Google Gemini API Key and Model</p>
+                        <p class="modal-sub">Configure your <strong>Nexus AI</strong> API Key &amp; Model</p>
                     </div>
                 </div>
                 <button id="btn-close-settings" class="modal-close-btn" aria-label="Close settings">
@@ -678,23 +678,35 @@
 
             <form id="settings-form" class="modal-form" onsubmit="return false;">
                 <div class="form-field">
-                    <label for="settings-api-key">Gemini API Key:</label>
+                    <label for="settings-api-key">
+                        <span style="display:inline-flex;align-items:center;gap:6px;">
+                            <i data-lucide="key-round" style="width:14px;height:14px;"></i>
+                            Nexus AI API Key:
+                        </span>
+                    </label>
                     <div class="input-with-action">
-                        <input type="password" id="settings-api-key" placeholder="Enter API Key (AQ.Ab8...)" autocomplete="off">
+                        <input type="password" id="settings-api-key" placeholder="Paste your Nexus API key here…" autocomplete="off">
                         <button type="button" id="btn-toggle-key-visibility" class="key-vis-btn" title="Show/Hide Key">
                             <i data-lucide="eye"></i>
                         </button>
                     </div>
-                    <span id="settings-key-status" class="field-hint">Active key: Checking...</span>
+                    <span id="settings-key-status" class="field-hint">Active key: Checking…</span>
                 </div>
 
                 <div class="form-field">
-                    <label for="settings-model">Gemini Model:</label>
+                    <label for="settings-model">
+                        <span style="display:inline-flex;align-items:center;gap:6px;">
+                            <i data-lucide="cpu" style="width:14px;height:14px;"></i>
+                            Nexus Model:
+                        </span>
+                    </label>
                     <select id="settings-model" class="field-select">
-                        <option value="gemini-3.5-flash">gemini-3.5-flash (Fast &amp; Accurate · Default)</option>
-                        <option value="gemini-3.5-flash-lite">gemini-3.5-flash-lite (Ultra Fast)</option>
-                        <option value="gemini-1.5-flash">gemini-1.5-flash</option>
-                        <option value="gemini-1.5-pro">gemini-1.5-pro (Deep Analysis)</option>
+                        <option value="gemini-3.1-flash-lite">gemini-3.1-flash-lite (Recommended · 1.1M Context · Ultra Fast)</option>
+                        <option value="claude-haiku-4-5">claude-haiku-4-5 (Anthropic · Ultra-Smart &amp; Crisp)</option>
+                        <option value="gemini-3.1-flash-image">gemini-3.1-flash-image (High Precision Vision)</option>
+                        <option value="gemini-3.1-flash-lite-image">gemini-3.1-flash-lite-image (Lowest Latency Vision)</option>
+                        <option value="gemini-2.5-flash">gemini-2.5-flash (Balanced)</option>
+                        <option value="gpt-4o">gpt-4o (OpenAI Flagship Multimodal)</option>
                     </select>
                 </div>
 
@@ -714,7 +726,27 @@
         </div>
     </div>
 
+    <!-- ════════════════════════════════════════════
+         CUSTOM TOAST & CONFIRM DIALOGS (NO BROWSER ALERTS)
+         ════════════════════════════════════════════ -->
+    <div id="echomap-toast" class="toast-card hidden" role="alert" aria-live="polite">
+        <span class="toast-dot"></span>
+        <span id="toast-message" class="toast-text"></span>
+    </div>
+
+    <div id="confirm-modal" class="modal-overlay hidden" role="dialog" aria-modal="true">
+        <div class="modal-card confirm-dialog-box">
+            <div class="confirm-icon-orb"><i data-lucide="alert-triangle"></i></div>
+            <h3 id="confirm-title" class="confirm-head">Clear Spatial Memory?</h3>
+            <p id="confirm-desc" class="confirm-sub">This will wipe all remembered objects and user facts.</p>
+            <div class="confirm-actions">
+                <button type="button" id="confirm-cancel-btn" class="pill-btn subtle">Cancel</button>
+                <button type="button" id="confirm-ok-btn" class="pill-btn warning">Wipe Memory</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Application Script with cache busting -->
-    <script src="/static/js/app.js?v=2.4"></script>
+    <script src="/static/js/app.js?v=2.9"></script>
 </body>
 </html>

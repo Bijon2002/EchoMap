@@ -125,6 +125,81 @@ body {
 .hidden { display: none !important; }
 .mt-3 { margin-top: 14px; }
 
+/* Custom Floating AeroGlass Toast & Confirm Modal */
+.toast-card {
+    position: fixed;
+    bottom: 32px;
+    right: 32px;
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 22px;
+    background: rgba(15, 23, 42, 0.92);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: var(--radius-pill);
+    box-shadow: 0 20px 40px -8px rgba(0, 0, 0, 0.35);
+    color: #ffffff;
+    font-size: 0.9rem;
+    font-weight: 600;
+    animation: toastSlideUp 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.toast-card.error {
+    background: rgba(225, 29, 72, 0.92);
+}
+
+.toast-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #38bdf8;
+    box-shadow: 0 0 10px #38bdf8;
+}
+
+@keyframes toastSlideUp {
+    from { opacity: 0; transform: translateY(16px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.confirm-dialog-box {
+    max-width: 440px !important;
+    text-align: center;
+    padding: 32px 28px !important;
+}
+
+.confirm-icon-orb {
+    width: 52px;
+    height: 52px;
+    border-radius: 50%;
+    background: rgba(225, 29, 72, 0.12);
+    color: #e11d48;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 16px auto;
+}
+
+.confirm-head {
+    font-size: 1.25rem;
+    font-weight: 800;
+    color: var(--text-hero);
+    margin-bottom: 8px;
+}
+
+.confirm-sub {
+    font-size: 0.88rem;
+    color: var(--text-secondary);
+    margin-bottom: 24px;
+}
+
+.confirm-actions {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+}
 /* Luxury Spatial Horizon Shell (Futuristic, Ambient, High-Tech) */
 .terragrip-shell {
     min-height: 100vh;
@@ -223,12 +298,13 @@ body {
     font-size: 1.22rem;
     font-weight: 700;
     letter-spacing: -0.03em;
-    color: var(--text-hero);
+    color: #ffffff;
+    text-shadow: 0 1px 4px rgba(0, 0, 0, 0.22);
 }
 
 .brand-title strong {
     font-weight: 850;
-    color: #0284c7;
+    color: #ffffff;
 }
 
 .brand-badge-pill {
@@ -238,9 +314,9 @@ body {
     text-transform: uppercase;
     padding: 2px 7px;
     border-radius: var(--radius-pill);
-    background: rgba(2, 132, 199, 0.12);
-    color: #0284c7;
-    border: 1px solid rgba(2, 132, 199, 0.25);
+    background: rgba(255, 255, 255, 0.18);
+    color: #ffffff;
+    border: 1px solid rgba(255, 255, 255, 0.4);
 }
 
 /* Nav Link Tabs */
@@ -2085,4 +2161,409 @@ body {
 .footer-keys {
     font-family: var(--font-sans);
     font-weight: 600;
+}
+
+/* ===================================================================
+   RESPONSIVE MOBILE LAYER
+   Tuned for narrow touch screens, including iPhone 16 Pro Max.
+   =================================================================== */
+@media (max-width: 768px) {
+    body {
+        min-width: 0;
+        overflow-x: hidden;
+    }
+
+    .terragrip-shell {
+        min-height: 100svh;
+        background-attachment: scroll;
+        background-position: center top;
+    }
+
+    .terragrip-nav {
+        margin: max(10px, env(safe-area-inset-top)) 12px 0;
+        padding: 10px;
+        border-radius: 24px;
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
+        gap: 10px;
+        align-items: center;
+    }
+
+    .nav-brand {
+        min-width: 0;
+    }
+
+    .brand-text-col {
+        min-width: 0;
+        gap: 5px;
+    }
+
+    .brand-title {
+        font-size: 1.08rem;
+    }
+
+    .brand-badge-pill {
+        font-size: 0.58rem;
+        padding: 2px 5px;
+    }
+
+    .nav-actions {
+        gap: 5px;
+        grid-column: 2;
+        grid-row: 1;
+        width: auto;
+    }
+
+    .nav-actions .pill-btn,
+    .nav-actions .nav-divider {
+        display: none;
+    }
+
+    .nav-actions .status-pill {
+        padding: 7px;
+    }
+
+    .nav-actions .status-pill #api-status-label {
+        display: none;
+    }
+
+    .nav-actions .pill-icon-btn {
+        width: 36px;
+        height: 36px;
+    }
+
+    .nav-links {
+        grid-column: 1 / -1;
+        grid-row: 2;
+        width: 100%;
+        min-width: 0;
+        gap: 4px;
+        overflow-x: auto;
+        overscroll-behavior-x: contain;
+        scrollbar-width: none;
+        padding: 2px;
+    }
+
+    .nav-links::-webkit-scrollbar {
+        display: none;
+    }
+
+    .nav-link {
+        flex: 0 0 auto;
+        min-height: 40px;
+        padding: 8px 15px;
+        font-size: 0.8rem;
+    }
+
+    .viewport-canvas {
+        width: 100%;
+        margin: 18px auto 0;
+        padding: 0 12px calc(28px + env(safe-area-inset-bottom));
+    }
+
+    .terragrip-hero {
+        padding: 10px 0 18px;
+    }
+
+    .hero-top-row {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 10px;
+        margin-bottom: 24px;
+    }
+
+    .pill-tag {
+        align-self: center;
+        max-width: 100%;
+        padding: 6px 12px;
+        font-size: 0.66rem;
+        white-space: nowrap;
+    }
+
+    .hero-float-card {
+        width: 100%;
+        justify-content: flex-start;
+        padding-right: 12px;
+    }
+
+    .hero-title {
+        font-size: clamp(2.65rem, 12vw, 4rem);
+        line-height: 1.02;
+    }
+
+    .hero-caption-card {
+        width: 100%;
+        padding: 14px 16px;
+        margin-top: 16px;
+    }
+
+    .hero-caption-lead {
+        font-size: 0.94rem;
+    }
+
+    .hero-caption-sub {
+        flex-wrap: wrap;
+        font-size: 0.82rem;
+        line-height: 1.45;
+    }
+
+    .capsule-container {
+        margin-bottom: 20px;
+    }
+
+    .frosted-capsule {
+        flex-wrap: wrap;
+        gap: 6px;
+        padding: 9px;
+        border-radius: 22px;
+    }
+
+    .capsule-icon {
+        width: 19px;
+        height: 19px;
+        margin: 0 2px 0 3px;
+    }
+
+    .frosted-capsule input {
+        flex: 1 1 calc(100% - 32px);
+        min-width: 0;
+        font-size: 0.94rem;
+    }
+
+    .capsule-mic,
+    .capsule-btn {
+        min-height: 44px;
+        margin: 0;
+        padding: 10px 13px;
+        font-size: 0.78rem;
+    }
+
+    .capsule-mic {
+        margin-left: 0;
+    }
+
+    .prompts-cluster {
+        margin-bottom: 24px;
+    }
+
+    .prompts-group {
+        width: 100%;
+        flex-wrap: nowrap;
+        justify-content: flex-start;
+        overflow-x: auto;
+        padding: 2px 2px 8px;
+        scrollbar-width: none;
+    }
+
+    .prompts-group::-webkit-scrollbar {
+        display: none;
+    }
+
+    .prompt-chip {
+        flex: 0 0 auto;
+        min-height: 42px;
+        padding: 8px 13px;
+        font-size: 0.78rem;
+    }
+
+    .edith-card,
+    .panel-box {
+        padding: 20px 16px;
+        border-radius: 22px;
+    }
+
+    .card-head,
+    .box-head {
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 12px;
+        margin-bottom: 18px;
+    }
+
+    .card-head-actions,
+    .box-actions {
+        width: 100%;
+        flex-wrap: wrap;
+    }
+
+    .card-head-actions > *,
+    .box-actions > * {
+        min-height: 42px;
+    }
+
+    .response-hero {
+        font-size: 1.08rem;
+    }
+
+    .card-tuning {
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    .map-layout,
+    .scan-layout,
+    .corrections-layout {
+        gap: 16px;
+    }
+
+    .canvas-viewport {
+        min-height: 300px;
+    }
+
+    .canvas-legend {
+        flex-wrap: wrap;
+        gap: 8px 16px;
+        padding: 10px 2px 0;
+        font-size: 0.7rem;
+    }
+
+    .source-pills {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 6px;
+    }
+
+    .source-pill {
+        min-height: 46px;
+        padding: 8px 5px;
+        justify-content: center;
+        font-size: 0.72rem;
+    }
+
+    .source-pill svg {
+        display: none;
+    }
+
+    .table-frame {
+        overflow-x: auto;
+        margin-inline: -4px;
+    }
+
+    .clean-table {
+        min-width: 620px;
+    }
+
+    .terragrip-footer {
+        margin: 0 12px max(12px, env(safe-area-inset-bottom));
+        padding: 14px 16px;
+        border-radius: 20px;
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 6px;
+        font-size: 0.72rem;
+    }
+
+    .footer-brand {
+        flex-wrap: wrap;
+    }
+
+    .footer-keys {
+        display: none;
+    }
+
+    .modal-overlay {
+        align-items: flex-end;
+        padding: 12px;
+    }
+
+    .modal-card {
+        max-height: calc(100svh - 24px);
+        overflow-y: auto;
+        padding: 22px 18px;
+        border-radius: 24px;
+    }
+}
+
+@media (max-width: 420px) {
+    .brand-badge-pill,
+    .float-arrow {
+        display: none;
+    }
+
+    .brand-icon-box {
+        width: 34px;
+        height: 34px;
+    }
+
+    .hero-title {
+        font-size: clamp(2.45rem, 13vw, 3.2rem);
+    }
+
+    .capsule-mic,
+    .capsule-btn {
+        flex: 1 1 0;
+        justify-content: center;
+    }
+
+    .box-actions .pill-btn {
+        flex: 1 1 0;
+        justify-content: center;
+        padding-inline: 10px;
+    }
+}
+
+/* Purposeful entrance motion for the core message and tab content. */
+.hero-line-main,
+.hero-line-accent {
+    animation: heroTextIn 0.8s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.hero-line-accent {
+    animation-delay: 120ms;
+}
+
+.hero-caption-card {
+    animation: heroCaptionIn 0.7s 220ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.deck-tab-view.active .box-title,
+.deck-tab-view.active .card-name {
+    animation: contentTextIn 0.45s 80ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes heroTextIn {
+    from {
+        opacity: 0;
+        transform: translateY(18px);
+        filter: blur(7px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+        filter: blur(0);
+    }
+}
+
+@keyframes heroCaptionIn {
+    from {
+        opacity: 0;
+        transform: translateY(12px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes contentTextIn {
+    from {
+        opacity: 0;
+        transform: translateX(-8px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        scroll-behavior: auto !important;
+        transition-duration: 0.01ms !important;
+    }
 }

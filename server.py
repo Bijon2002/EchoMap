@@ -77,12 +77,18 @@ class TTSRequest(BaseModel):
 
 class SettingsRequest(BaseModel):
     api_key: Optional[str] = None
-    model: Optional[str] = "gemini-3.5-flash"
+    model: Optional[str] = "gemini-3.1-flash-lite"
     test_connection: Optional[bool] = False
 
 
 # In-memory LRU-bounded cache for fast instantaneous playback
 _TTS_CACHE: Dict[str, bytes] = {}
+
+
+@app.get("/favicon.ico", include_in_schema=False)
+async def favicon():
+    """Silence favicon 404 logs with an empty response."""
+    return Response(content=b"", media_type="image/x-icon")
 
 
 # -------------------------------------------------------------
@@ -491,40 +497,43 @@ async def reset_memory():
 # -------------------------------------------------------------
 @app.get("/api/settings")
 async def get_settings():
-    """Returns current Gemini API configuration (masked for security)."""
+    """Returns current Nexus AI API configuration (masked for security)."""
     key = vision.API_KEY
     masked = (key[:6] + "..." + key[-4:]) if len(key) > 10 else ("configured" if key else "not configured")
     return {
         "configured": vision.is_api_configured(),
         "model": vision.MODEL_NAME,
         "masked_key": masked,
+        "provider": "Nexus AI",
+        "base_url": vision.NEXUS_BASE_URL,
         "models_available": [
-            "gemini-3.5-flash",
-            "gemini-3.5-flash-lite",
-            "gemini-1.5-flash",
-            "gemini-1.5-pro",
+            "gemini-3.1-flash-lite",
+            "gemini-3.1-flash-image",
+            "claude-haiku-4-5",
+            "gemini-2.5-flash",
+            "gpt-4o",
         ],
     }
 
 
 @app.post("/api/settings")
 async def save_settings(req: SettingsRequest):
-    """Updates and saves the Gemini API key and model selection."""
+    """Updates and saves the Nexus AI API key and model selection."""
     new_key = (req.api_key or "").strip()
-    new_model = (req.model or "gemini-3.5-flash").strip()
+    new_model = (req.model or "gemini-3.1-flash-lite").strip()
 
     if req.test_connection and new_key:
-        verification = vision.verify_gemini_connection(new_key, new_model)
+        verification = vision.verify_nexus_connection(new_key, new_model)
         if not verification["valid"]:
             raise HTTPException(
                 status_code=400,
-                detail=f"Gemini API verification failed: {verification['message']}"
+                detail=f"Nexus AI verification failed: {verification['message']}"
             )
 
     updated = vision.update_api_config(new_key, new_model)
     return {
         "success": True,
-        "message": f"Settings updated successfully. Gemini model: {updated['model']}.",
+        "message": f"Nexus AI configured. Model: {updated['model']}.",
         **updated,
     }
 
