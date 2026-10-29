@@ -46,6 +46,48 @@ def is_api_configured() -> bool:
     return bool(API_KEY and API_KEY != "your_gemini_api_key_here")
 
 
+def update_api_config(new_key: str, new_model: Optional[str] = None) -> Dict[str, Any]:
+    """Updates runtime API key and persists it to .env file."""
+    global API_KEY, MODEL_NAME
+    cleaned_key = (new_key or "").strip()
+    if cleaned_key:
+        API_KEY = cleaned_key
+        os.environ["GEMINI_API_KEY"] = API_KEY
+
+    if new_model and new_model.strip():
+        MODEL_NAME = new_model.strip()
+        os.environ["GEMINI_MODEL"] = MODEL_NAME
+
+    # Save to .env
+    from pathlib import Path
+    env_path = Path(__file__).parent / ".env"
+    try:
+        with open(env_path, "w", encoding="utf-8") as f:
+            f.write(f"# EchoMap Configuration\nGEMINI_API_KEY={API_KEY}\nGEMINI_MODEL={MODEL_NAME}\n")
+    except Exception as e:
+        pass
+
+    return {
+        "configured": is_api_configured(),
+        "model": MODEL_NAME,
+        "masked_key": (API_KEY[:6] + "..." + API_KEY[-4:]) if len(API_KEY) > 10 else ("***" if API_KEY else ""),
+    }
+
+
+def verify_gemini_connection(test_key: str, test_model: str) -> Dict[str, Any]:
+    """Attempts a lightweight verification call to Gemini to ensure key is valid."""
+    try:
+        from google import genai
+        client = genai.Client(api_key=test_key)
+        res = client.models.generate_content(
+            model=test_model or MODEL_NAME,
+            contents="Respond with only the word OK",
+        )
+        return {"valid": True, "message": "Successfully connected to Gemini API"}
+    except Exception as e:
+        return {"valid": False, "message": str(e)}
+
+
 def clean_json_response(raw_text: str) -> str:
     """Extracts JSON content from potential Markdown backticks or preambles."""
     cleaned = raw_text.strip()
@@ -62,6 +104,11 @@ def clean_json_response(raw_text: str) -> str:
 
 
 def scan_desk(image: Image.Image, force_mock: bool = False) -> List[Dict[str, Any]]:
+    # Ensure image is fully loaded and in RGB mode
+    if isinstance(image, Image.Image):
+        image.load()
+        if image.mode != "RGB":
+            image = image.convert("RGB")
     """
     Scans a desk image to identify objects and normalized coordinates.
     Returns a list of dicts with name, x, y, confidence, and region_desc.

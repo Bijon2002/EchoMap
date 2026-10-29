@@ -69,17 +69,23 @@ graph TD
 
 ```
 EchoMap/
-├── app.py                 # Streamlit UI, visual spatial map, and dashboard
+├── server.py              # FastAPI modern web application & REST API
+├── static/                # Modern accessible HTML5/CSS/JS frontend
+│   ├── index.html         # Accessible single-page app shell
+│   ├── css/style.css      # Dark tech theme & WCAG AAA High-Contrast styles
+│   └── js/app.js          # Web Speech API, interactive SVG radar & webcam HUD
+├── app.py                 # Streamlit UI (legacy alternative)
 ├── vision.py              # Google Gemini API vision engine & Pydantic schemas
 ├── memory.py              # SQLite persistent spatial memory & corrections
 ├── spatial.py             # 9-grid geometry, distance, and scan diffing
 ├── commands.py            # Natural language query engine
 ├── voice.py               # Browser speech synthesis (TTS) & Web Speech mic widget
-├── requirements.txt       # Python dependencies
+├── requirements.txt       # Python dependencies (FastAPI, Uvicorn, Pillow, etc.)
 ├── .env.example           # Configuration template
 ├── .gitignore             # Standard Python / SQLite gitignore
 ├── README.md              # Project documentation
 └── tests/                 # Pytest test suite
+    ├── test_server.py     # FastAPI endpoint and web routing tests
     ├── test_spatial.py    # Spatial reasoning & movement verification tests
     ├── test_memory.py     # SQLite persistence & correction tests
     └── test_commands.py   # Query processing tests
@@ -125,11 +131,22 @@ pytest -v
 
 ### 4. Launch EchoMap
 
+#### 🌟 Modern Web Interface (Recommended)
+FastAPI backend with a sleek, accessible HTML5/CSS3/JS single-page UI, native browser Web Speech API, and interactive 2D SVG spatial radar map:
+
+```powershell
+python server.py
+# or: uvicorn server:app --reload
+```
+Open your browser at **`http://localhost:8000`**.
+
+#### 📦 Legacy Streamlit Interface (Alternative)
+The original Streamlit dashboard is also retained:
+
 ```powershell
 streamlit run app.py
 ```
-
-Your browser will automatically open at `http://localhost:8501`.
+Open your browser at `http://localhost:8501`.
 
 ---
 

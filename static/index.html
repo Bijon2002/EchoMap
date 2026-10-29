@@ -1,0 +1,720 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EchoMap &mdash; E.D.I.T.H. Spatial Memory</title>
+    <!-- Modern Editorial Font (Plus Jakarta Sans + JetBrains Mono) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Vector Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link rel="stylesheet" href="/static/css/style.css?v=2.4">
+</head>
+<body>
+    <!-- Screen Reader Announcer -->
+    <div id="aria-announcer" class="sr-only" aria-live="assertive" role="status"></div>
+
+    <div class="terragrip-shell">
+
+        <!-- ════════════════════════════════════════════
+             TOP FLOATING PILL NAVBAR (TerraGrip Minimal)
+             ════════════════════════════════════════════ -->
+        <header class="terragrip-nav" role="banner">
+            <!-- Brand (Vector Icon-Wise Emblem) -->
+            <div class="nav-brand">
+                <div class="brand-icon-box" title="EchoMap Spatial AI">
+                    <svg class="brand-icon-svg" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <circle cx="16" cy="16" r="13" stroke="currentColor" stroke-width="1.6" stroke-opacity="0.35" stroke-dasharray="2 3"/>
+                        <circle cx="16" cy="16" r="9" stroke="currentColor" stroke-width="1.8" stroke-opacity="0.75"/>
+                        <path d="M16 4V7M16 25V28M4 16H7M25 16H28" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+                        <rect x="12" y="12" width="8" height="8" rx="2" transform="rotate(45 16 16)" fill="currentColor"/>
+                        <circle cx="16" cy="16" r="1.6" fill="#ffffff"/>
+                    </svg>
+                </div>
+                <div class="brand-text-col">
+                    <span class="brand-title">Echo<strong>Map</strong></span>
+                    <span class="brand-badge-pill">E.D.I.T.H. AI</span>
+                </div>
+            </div>
+
+            <!-- Sleek Tab Links -->
+            <nav class="nav-links" role="tablist" aria-label="Main Navigation">
+                <button class="nav-link active" data-tab="tab-voice" role="tab" aria-selected="true" id="tab-btn-voice">
+                    <span>Voice</span>
+                </button>
+                <button class="nav-link" data-tab="tab-map" role="tab" aria-selected="false" id="tab-btn-map">
+                    <span>Radar</span>
+                </button>
+                <button class="nav-link" data-tab="tab-scan" role="tab" aria-selected="false" id="tab-btn-scan">
+                    <span>Scan</span>
+                </button>
+                <button class="nav-link" data-tab="tab-diff" role="tab" aria-selected="false" id="tab-btn-diff">
+                    <span>Diff</span>
+                </button>
+                <button class="nav-link" data-tab="tab-corrections" role="tab" aria-selected="false" id="tab-btn-corrections">
+                    <span>Facts</span>
+                </button>
+            </nav>
+
+            <!-- Actions Cluster -->
+            <div class="nav-actions">
+                <button id="btn-load-sample" class="pill-btn solid" title="Load sample desk">
+                    <span>Sample Desk</span>
+                </button>
+                <button id="btn-simulate-diff" class="pill-btn subtle" title="Simulate moved keys">
+                    <span>Test Diff</span>
+                </button>
+                <button id="btn-clear-memory" class="pill-icon-btn" title="Clear memory" aria-label="Clear memory">
+                    <i data-lucide="trash-2"></i>
+                </button>
+
+                <div class="nav-divider"></div>
+
+                <div id="api-status-pill" class="status-pill" title="AI Status">
+                    <span class="status-dot"></span>
+                    <span id="api-status-label">Online</span>
+                </div>
+
+                <button id="tts-toggle-btn" class="pill-icon-btn active" title="Mute/Unmute Voice" aria-label="Toggle Voice">
+                    <i data-lucide="volume-2"></i>
+                </button>
+
+                <button id="contrast-toggle-btn" class="pill-icon-btn" title="High Contrast Mode" aria-label="Toggle Contrast">
+                    <i data-lucide="contrast"></i>
+                </button>
+
+                <button id="btn-open-settings" class="pill-icon-btn" title="AI & Vision Settings" aria-label="Settings">
+                    <i data-lucide="settings"></i>
+                </button>
+            </div>
+        </header>
+
+        <!-- ════════════════════════════════════════════
+             MAIN PANORAMIC VIEWPORT
+             ════════════════════════════════════════════ -->
+        <main class="viewport-canvas">
+
+            <!-- ══════════════════════════════════════
+                 TAB 1: VOICE ASSISTANT HERO
+                 ══════════════════════════════════════ -->
+            <section id="tab-voice" class="deck-tab-view active" role="tabpanel" aria-labelledby="tab-btn-voice">
+                <div class="terragrip-hero">
+
+                    <!-- Floating Companion Badge (TerraGrip signature) -->
+                    <div class="hero-top-row">
+                        <div class="pill-tag">
+                            <span class="tag-sparkle"></span>
+                            <span>E.D.I.T.H. SPATIAL MEMORY</span>
+                        </div>
+                        <div class="hero-float-card" id="float-radar-preview" title="Click to view 2D Radar">
+                            <img src="/static/images/spatial_sensor.jpg" alt="Spatial Radar Sensor" class="float-thumb">
+                            <div class="float-text">
+                                <span class="float-title">Spatial Radar</span>
+                                <span class="float-sub" id="float-objects-summary">Active Memory</span>
+                            </div>
+                            <i data-lucide="arrow-up-right" class="float-arrow"></i>
+                        </div>
+                    </div>
+
+                    <!-- Clean Impact Headline with Highlight & Contrast -->
+                    <div class="hero-headline-group">
+                        <h1 class="hero-title">
+                            <span class="hero-line-main">Your World,</span>
+                            <span class="hero-line-accent">Remembered.</span>
+                        </h1>
+
+                        <div class="hero-caption-card">
+                            <p class="hero-caption-lead">
+                                <span class="caption-sparkle">✦</span>
+                                Tactile spatial assistant for <strong>blind and low-vision awareness</strong>.
+                            </p>
+                            <p class="hero-caption-sub">
+                                <span class="hero-live-dot"></span>
+                                Ask where any item is &mdash; <span class="highlight-pill">hands-free, always on</span>.
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Centerpiece: Frosted Glass Capsule Search -->
+                    <div class="capsule-container">
+                        <form id="query-form" class="frosted-capsule" onsubmit="return false;">
+                            <i data-lucide="search" class="capsule-icon"></i>
+                            <input 
+                                type="text" 
+                                id="text-query-input" 
+                                placeholder="Ask E.D.I.T.H.: Where are my keys?" 
+                                autocomplete="off"
+                            >
+                            <button type="button" id="mic-trigger-btn" class="capsule-mic" title="Hold Space to Talk">
+                                <i data-lucide="mic"></i>
+                                <span id="mic-btn-label">Space to Talk</span>
+                            </button>
+                            <button type="submit" id="btn-send-query" class="capsule-btn">
+                                <span>Ask</span>
+                                <i data-lucide="arrow-right"></i>
+                            </button>
+                        </form>
+                    </div>
+
+                    <!-- Clean Quick Query Pills -->
+                    <div class="prompts-cluster">
+                        <span class="prompts-hint">Quick queries:</span>
+                        <div class="prompts-group">
+                            <button class="prompt-chip" data-query="Where are my keys?">Keys</button>
+                            <button class="prompt-chip" data-query="What is beside my phone?">Beside phone</button>
+                            <button class="prompt-chip" data-query="What is on my desk?">Full desk</button>
+                            <button class="prompt-chip" data-query="Did my keys move?">Keys moved?</button>
+                            <button class="prompt-chip" data-query="Where is my coffee mug?">Coffee mug</button>
+                            <button class="prompt-chip" data-query="Hey EchoMap, help">Help</button>
+                        </div>
+                    </div>
+
+                    <!-- E.D.I.T.H. Frosted Console -->
+                    <div class="edith-card">
+                        <div class="card-head">
+                            <div class="card-identity">
+                                <span class="card-orb">
+                                    <i data-lucide="sparkles"></i>
+                                </span>
+                                <div>
+                                    <span class="card-name">E.D.I.T.H.</span>
+                                    <span class="card-sub">British Marvel AI &bull; Natural Ups &amp; Downs</span>
+                                </div>
+                            </div>
+                            <div class="card-head-actions">
+                                <span id="speaking-badge" class="active-badge hidden">
+                                    <span class="badge-dot"></span>
+                                    <span>Speaking</span>
+                                </span>
+                                <button id="btn-test-voice" class="subtle-pill" title="Test vocal inflection">
+                                    <i data-lucide="play-circle"></i>
+                                    <span>Test Ups &amp; Downs</span>
+                                </button>
+                                <button id="btn-replay-speech" class="subtle-pill" title="Replay response (Press R)">
+                                    <i data-lucide="volume-2"></i>
+                                    <span>Replay</span>
+                                </button>
+                                <button id="btn-copy-response" class="subtle-pill" title="Copy answer">
+                                    <i data-lucide="copy"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Spoken Answer -->
+                        <div class="card-response">
+                            <p id="response-text" class="response-hero">
+                                "Systems online. Standing by for spatial queries. Ask me where any item is, or click 'Sample Desk' above to begin."
+                            </p>
+                        </div>
+
+                        <!-- Live Transcript & Equalizer -->
+                        <div class="card-transcript">
+                            <div class="transcript-meta">
+                                <i data-lucide="audio-lines"></i>
+                                <span id="mic-status-text">Microphone ready. Hold <kbd>Space</kbd> to speak.</span>
+                            </div>
+                            <div id="live-transcript" class="transcript-display">"Where are my keys?"</div>
+                            <div id="soundwave-bars" class="soundwaves hidden">
+                                <span></span><span></span><span></span><span></span>
+                                <span></span><span></span><span></span><span></span>
+                            </div>
+                        </div>
+
+                        <!-- Prosodic Tuning & Controls -->
+                        <div class="card-tuning">
+                            <div class="tuning-group">
+                                <label for="voice-select">Voice Persona:</label>
+                                <select id="voice-select" class="clean-select"></select>
+                            </div>
+
+                            <div class="tuning-group">
+                                <label for="voice-inflection">Ups &amp; Downs: <span id="inflection-val">Expressive</span></label>
+                                <input type="range" id="voice-inflection" min="0.5" max="2.0" step="0.25" value="1.5" class="clean-slider">
+                            </div>
+
+                            <div class="tuning-group">
+                                <label for="voice-rate">Speed: <span id="rate-val">1.0x</span></label>
+                                <input type="range" id="voice-rate" min="0.8" max="1.3" step="0.05" value="1.0" class="clean-slider">
+                            </div>
+
+                            <div class="tuning-meta">
+                                <span id="response-timestamp">Cache</span>
+                                <span>&bull;</span>
+                                <span id="response-scan-ref">Scan #1</span>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </section>
+
+            <!-- ══════════════════════════════════════
+                 TAB 2: 2D SPATIAL RADAR
+                 ══════════════════════════════════════ -->
+            <section id="tab-map" class="deck-tab-view" role="tabpanel" aria-labelledby="tab-btn-map">
+                <div class="terragrip-grid map-layout">
+
+                    <!-- Left: Interactive Map -->
+                    <div class="panel-box canvas-column">
+                        <div class="box-head">
+                            <div>
+                                <h2 class="box-title">2D Spatial Radar</h2>
+                                <p class="box-desc">Range rings (25cm, 50cm, 75cm) and tactile 9-grid coordinates</p>
+                            </div>
+                            <div class="box-actions">
+                                <button id="btn-radar-sweep" class="pill-btn solid">
+                                    <i data-lucide="radar"></i>
+                                    <span>Sonar Sweep</span>
+                                </button>
+                                <button id="btn-refresh-map" class="pill-btn subtle">
+                                    <i data-lucide="refresh-cw"></i>
+                                    <span>Refresh</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="canvas-viewport" id="desk-wrapper">
+                            <svg id="spatial-svg" viewBox="0 0 900 550" class="spatial-canvas" aria-label="Interactive 2D spatial desk map"></svg>
+                            <div id="radar-beam" class="sonar-beam hidden"></div>
+
+                            <!-- Tooltip -->
+                            <div id="object-tooltip" class="tactical-tooltip hidden">
+                                <div class="tooltip-title" id="tooltip-title">Keys</div>
+                                <div class="tooltip-line" id="tooltip-sector">Sector: Centre</div>
+                                <div class="tooltip-line" id="tooltip-coords">Coords: (0.35, 0.48)</div>
+                                <div class="tooltip-line" id="tooltip-conf">Confidence: 91%</div>
+                                <div class="tooltip-prox" id="tooltip-near">Near: phone, pen</div>
+                            </div>
+                        </div>
+
+                        <div class="canvas-legend">
+                            <span><i data-lucide="arrow-up"></i> Top Edge &bull; Far Desk Area</span>
+                            <span><i data-lucide="arrow-down"></i> Bottom Edge &bull; Near Hands</span>
+                        </div>
+                    </div>
+
+                    <!-- Right: Reach Tiers & Inspector -->
+                    <div class="panel-box sectors-column">
+                        <div class="box-head">
+                            <div>
+                                <h2 class="box-title">Reach Sectors</h2>
+                                <p class="box-desc">Grouped by distance</p>
+                            </div>
+                        </div>
+
+                        <div class="sector-tiers-stack">
+                            <div class="tier-card">
+                                <div class="tier-head">
+                                    <span class="tier-badge-label">
+                                        <span class="tier-dot far-dot"></span>
+                                        <span>Far Desk (Back)</span>
+                                    </span>
+                                    <span id="count-far" class="tier-count">0 items</span>
+                                </div>
+                                <div id="list-far" class="tier-items-flow">
+                                    <span class="empty-hint">No items</span>
+                                </div>
+                            </div>
+
+                            <div class="tier-card">
+                                <div class="tier-head">
+                                    <span class="tier-badge-label">
+                                        <span class="tier-dot mid-dot"></span>
+                                        <span>Centre Work Focus</span>
+                                    </span>
+                                    <span id="count-mid" class="tier-count">0 items</span>
+                                </div>
+                                <div id="list-mid" class="tier-items-flow">
+                                    <span class="empty-hint">No items</span>
+                                </div>
+                            </div>
+
+                            <div class="tier-card">
+                                <div class="tier-head">
+                                    <span class="tier-badge-label">
+                                        <span class="tier-dot near-dot"></span>
+                                        <span>Near Hands (Front)</span>
+                                    </span>
+                                    <span id="count-near" class="tier-count">0 items</span>
+                                </div>
+                                <div id="list-near" class="tier-items-flow">
+                                    <span class="empty-hint">No items</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Object Focus Inspector -->
+                        <div id="selected-detail-box" class="focus-inspector">
+                            <div class="inspector-blank">
+                                <i data-lucide="mouse-pointer-click"></i>
+                                <p>Click any object node to inspect details.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </section>
+
+            <!-- ══════════════════════════════════════
+                 TAB 3: VISION SCAN
+                 ══════════════════════════════════════ -->
+            <section id="tab-scan" class="deck-tab-view" role="tabpanel" aria-labelledby="tab-btn-scan">
+                <div class="terragrip-grid scan-layout">
+
+                    <!-- Left: Camera HUD -->
+                    <div class="panel-box">
+                        <div class="box-head">
+                            <div>
+                                <h2 class="box-title">Workspace Scanner</h2>
+                                <p class="box-desc">On-demand capture &bull; Zero background streaming</p>
+                            </div>
+                        </div>
+
+                        <div class="source-pills">
+                            <button class="source-pill active" data-source="webcam" id="source-btn-webcam">
+                                <i data-lucide="video"></i>
+                                <span>Webcam</span>
+                            </button>
+                            <button class="source-pill" data-source="upload" id="source-btn-upload">
+                                <i data-lucide="upload"></i>
+                                <span>Upload Photo</span>
+                            </button>
+                            <button class="source-pill" data-source="mock" id="source-btn-mock">
+                                <i data-lucide="flask-conical"></i>
+                                <span>Demo Scene</span>
+                            </button>
+                        </div>
+
+                        <!-- Webcam Pane -->
+                        <div id="webcam-pane" class="vision-pane active">
+                            <div class="camera-stage">
+                                <video id="webcam-stream" autoplay playsinline muted></video>
+                                <canvas id="webcam-canvas" class="hidden"></canvas>
+                                
+                                <div class="camera-hud-overlay">
+                                    <div class="hud-corner tl"></div>
+                                    <div class="hud-corner tr"></div>
+                                    <div class="hud-corner bl"></div>
+                                    <div class="hud-corner br"></div>
+                                    <div class="hud-cross"></div>
+                                    <div class="hud-pill">VIEWFINDER READY</div>
+                                </div>
+
+                                <div id="camera-offline-msg" class="camera-halted hidden">
+                                    <i data-lucide="camera-off"></i>
+                                    <span>Camera stream stopped. Click below to start.</span>
+                                </div>
+                            </div>
+
+                            <div class="stage-actions">
+                                <button id="btn-toggle-cam" class="pill-btn subtle">
+                                    <i data-lucide="power"></i>
+                                    <span id="cam-toggle-text">Stop Camera</span>
+                                </button>
+                                <button id="btn-capture-scan" class="pill-btn solid large">
+                                    <i data-lucide="sparkles"></i>
+                                    <span>Capture with Gemini</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Upload Pane -->
+                        <div id="upload-pane" class="vision-pane hidden">
+                            <div class="drop-surface" id="drop-zone">
+                                <i data-lucide="image-plus" class="drop-icon"></i>
+                                <p class="drop-title">Drag desk photo here, or click to browse</p>
+                                <span class="drop-hint">PNG, JPG, JPEG, WEBP</span>
+                                <input type="file" id="file-input" accept="image/*" class="hidden">
+                            </div>
+                            <div class="sample-photo-trigger-row mt-3">
+                                <button type="button" id="btn-load-sample-photo" class="pill-btn subtle full-width">
+                                    <i data-lucide="image"></i>
+                                    <span>Load Photorealistic Desk Photo (7 Items)</span>
+                                </button>
+                            </div>
+                            <div id="upload-preview-container" class="preview-box hidden">
+                                <img id="upload-preview-img" alt="Captured preview">
+                                <button id="btn-scan-upload" class="pill-btn solid full-width mt-3">
+                                    <i data-lucide="sparkles"></i>
+                                    <span>Scan with Gemini</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Mock Pane -->
+                        <div id="mock-pane" class="vision-pane hidden">
+                            <div class="demo-card">
+                                <h4>Synthetic Workspace</h4>
+                                <p>Generates a complete multi-item workspace (phone, keys, mug, laptop, notebook, pen, bottle) for offline testing without camera or credits.</p>
+                                <button id="btn-trigger-mock" class="pill-btn solid full-width mt-3">
+                                    <i data-lucide="layers"></i>
+                                    <span>Load Demo Desk</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Right: Objects Table -->
+                    <div class="panel-box">
+                        <div class="box-head">
+                            <div>
+                                <h2 class="box-title">Remembered Objects</h2>
+                                <p id="current-scan-summary" class="box-desc">Current workspace observation</p>
+                            </div>
+                            <span id="detected-counter" class="box-count">0 items</span>
+                        </div>
+
+                        <div class="table-frame">
+                            <table class="clean-table" id="detections-table">
+                                <thead>
+                                    <tr>
+                                        <th>Object</th>
+                                        <th>Sector</th>
+                                        <th>Confidence</th>
+                                        <th>X</th>
+                                        <th>Y</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="detections-tbody">
+                                    <tr>
+                                        <td colspan="5" class="table-blank">No objects recorded. Scan or load sample desk.</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                </div>
+            </section>
+
+            <!-- ══════════════════════════════════════
+                 TAB 4: MOVEMENT DIFF
+                 ══════════════════════════════════════ -->
+            <section id="tab-diff" class="deck-tab-view" role="tabpanel" aria-labelledby="tab-btn-diff">
+                <div class="panel-box diff-panel">
+                    <div class="box-head">
+                        <div>
+                            <h2 class="box-title">Movement Tracking</h2>
+                            <p class="box-desc">Cross-scan verification distinguishing moved, missing, and new items</p>
+                        </div>
+                        <div class="box-actions">
+                            <button id="btn-load-diff-test" class="pill-btn warning">
+                                <i data-lucide="git-commit"></i>
+                                <span>Simulate Movement</span>
+                            </button>
+                            <button id="btn-refresh-diff" class="pill-btn subtle">
+                                <i data-lucide="refresh-cw"></i>
+                                <span>Refresh</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Timeline -->
+                    <div class="diff-timeline-row">
+                        <div class="timeline-box">
+                            <span class="timeline-tag">Baseline</span>
+                            <span id="diff-prev-title" class="timeline-title">Scan #1</span>
+                            <span id="diff-prev-time" class="timeline-time">--:--</span>
+                        </div>
+                        <div class="timeline-sep">
+                            <i data-lucide="arrow-right"></i>
+                        </div>
+                        <div class="timeline-box">
+                            <span class="timeline-tag">Observation</span>
+                            <span id="diff-latest-title" class="timeline-title">Scan #2</span>
+                            <span id="diff-latest-time" class="timeline-time">--:--</span>
+                        </div>
+                    </div>
+
+                    <!-- 4 Metric Cards -->
+                    <div class="metrics-quad">
+                        <div class="quad-card emerald-theme">
+                            <span id="metric-same-count" class="quad-num">0</span>
+                            <span class="quad-label">Stationary</span>
+                        </div>
+                        <div class="quad-card amber-theme">
+                            <span id="metric-moved-count" class="quad-num">0</span>
+                            <span class="quad-label">Moved Items</span>
+                        </div>
+                        <div class="quad-card rose-theme">
+                            <span id="metric-missing-count" class="quad-num">0</span>
+                            <span class="quad-label">Missing</span>
+                        </div>
+                        <div class="quad-card cyan-theme">
+                            <span id="metric-new-count" class="quad-num">0</span>
+                            <span class="quad-label">New Additions</span>
+                        </div>
+                    </div>
+
+                    <!-- Feed -->
+                    <div id="diff-items-container" class="diff-feed">
+                        <div class="diff-blank">
+                            <i data-lucide="history"></i>
+                            <p>Need at least 2 scans to evaluate movement. Click <strong>"Simulate Movement"</strong> above.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ══════════════════════════════════════
+                 TAB 5: TACTILE CORRECTIONS
+                 ══════════════════════════════════════ -->
+            <section id="tab-corrections" class="deck-tab-view" role="tabpanel" aria-labelledby="tab-btn-corrections">
+                <div class="terragrip-grid corrections-layout">
+
+                    <!-- Left: Teach Form -->
+                    <div class="panel-box">
+                        <div class="box-head">
+                            <div>
+                                <h2 class="box-title">Teach a Spatial Fact</h2>
+                                <p class="box-desc">Ground-truth knowledge taught via touch</p>
+                            </div>
+                        </div>
+
+                        <form id="correction-form" class="clean-form">
+                            <div class="form-field">
+                                <label for="fact-obj-name">Target Item:</label>
+                                <input type="text" id="fact-obj-name" placeholder="e.g. keys or glasses" required>
+                            </div>
+
+                            <div class="form-field">
+                                <label for="fact-relation">Relationship:</label>
+                                <select id="fact-relation">
+                                    <option value="beside">beside</option>
+                                    <option value="near">near</option>
+                                    <option value="left of">left of</option>
+                                    <option value="right of">right of</option>
+                                    <option value="in front of">in front of</option>
+                                    <option value="behind">behind</option>
+                                    <option value="on top of">on top of</option>
+                                </select>
+                            </div>
+
+                            <div class="form-field">
+                                <label for="fact-ref-obj">Reference Object:</label>
+                                <input type="text" id="fact-ref-obj" placeholder="e.g. phone or laptop" required>
+                            </div>
+
+                            <div class="form-field">
+                                <label for="fact-note">Tactile Note:</label>
+                                <input type="text" id="fact-note" placeholder="e.g. Inside the leather tray">
+                            </div>
+
+                            <button type="submit" class="pill-btn solid full-width mt-3">
+                                <i data-lucide="bookmark-plus"></i>
+                                <span>Save Fact</span>
+                            </button>
+                        </form>
+                    </div>
+
+                    <!-- Right: Saved Facts Table -->
+                    <div class="panel-box">
+                        <div class="box-head">
+                            <div>
+                                <h2 class="box-title">Saved Tactile Rules</h2>
+                                <p class="box-desc">Prioritized during spatial queries</p>
+                            </div>
+                            <span id="facts-counter" class="box-count">0 facts</span>
+                        </div>
+
+                        <div class="table-frame">
+                            <table class="clean-table" id="corrections-table">
+                                <thead>
+                                    <tr>
+                                        <th>Object</th>
+                                        <th>Relation</th>
+                                        <th>Reference</th>
+                                        <th>Note</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="corrections-tbody">
+                                    <tr>
+                                        <td colspan="5" class="table-blank">No tactile facts recorded yet.</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                </div>
+            </section>
+        </main>
+
+        <!-- ════════════════════════════════════════════
+             MINIMAL FOOTER
+             ════════════════════════════════════════════ -->
+        <footer class="terragrip-footer">
+            <div class="footer-brand">
+                <span>EchoMap &bull; E.D.I.T.H.</span>
+                <span class="footer-muted">University of Bedfordshire HCI + AI</span>
+            </div>
+            <div class="footer-keys">
+                Hold <kbd>Space</kbd> to Speak &bull; <kbd>R</kbd> Replay &bull; <kbd>1</kbd>–<kbd>5</kbd> Switch Tabs
+            </div>
+        </footer>
+
+    </div>
+
+    <!-- ════════════════════════════════════════════
+         SETTINGS MODAL (GEMINI API KEY & MODEL)
+         ════════════════════════════════════════════ -->
+    <div id="settings-modal" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="settings-title">
+        <div class="modal-card">
+            <div class="modal-head">
+                <div class="modal-title-wrap">
+                    <span class="modal-icon-orb"><i data-lucide="sliders"></i></span>
+                    <div>
+                        <h3 id="settings-title" class="modal-title">AI &amp; Vision Settings</h3>
+                        <p class="modal-sub">Configure your Google Gemini API Key and Model</p>
+                    </div>
+                </div>
+                <button id="btn-close-settings" class="modal-close-btn" aria-label="Close settings">
+                    <i data-lucide="x"></i>
+                </button>
+            </div>
+
+            <form id="settings-form" class="modal-form" onsubmit="return false;">
+                <div class="form-field">
+                    <label for="settings-api-key">Gemini API Key:</label>
+                    <div class="input-with-action">
+                        <input type="password" id="settings-api-key" placeholder="Enter API Key (AQ.Ab8...)" autocomplete="off">
+                        <button type="button" id="btn-toggle-key-visibility" class="key-vis-btn" title="Show/Hide Key">
+                            <i data-lucide="eye"></i>
+                        </button>
+                    </div>
+                    <span id="settings-key-status" class="field-hint">Active key: Checking...</span>
+                </div>
+
+                <div class="form-field">
+                    <label for="settings-model">Gemini Model:</label>
+                    <select id="settings-model" class="field-select">
+                        <option value="gemini-3.5-flash">gemini-3.5-flash (Fast &amp; Accurate · Default)</option>
+                        <option value="gemini-3.5-flash-lite">gemini-3.5-flash-lite (Ultra Fast)</option>
+                        <option value="gemini-1.5-flash">gemini-1.5-flash</option>
+                        <option value="gemini-1.5-pro">gemini-1.5-pro (Deep Analysis)</option>
+                    </select>
+                </div>
+
+                <div id="settings-feedback" class="settings-feedback hidden"></div>
+
+                <div class="modal-actions">
+                    <button type="button" id="btn-test-key" class="pill-btn subtle">
+                        <i data-lucide="check-circle-2"></i>
+                        <span>Test Connection</span>
+                    </button>
+                    <button type="submit" id="btn-save-settings" class="pill-btn solid">
+                        <i data-lucide="save"></i>
+                        <span>Save &amp; Apply</span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Application Script with cache busting -->
+    <script src="/static/js/app.js?v=2.4"></script>
+</body>
+</html>
